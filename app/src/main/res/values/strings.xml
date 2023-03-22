@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">Daily Duas</string>
+    <string-array name="fonts">
+        <item>Open sans Bold</item>
+        <item>Open sans Regular</item>
+        <item>Times new Roman</item>
+        <item>Motena Golden Regular</item>
+        <item>Roboto</item>
+        <item>Roboto Variable</item>
+
+
+    </string-array>
 </resources>
