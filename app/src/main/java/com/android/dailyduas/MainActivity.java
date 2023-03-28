@@ -9,6 +9,7 @@ import android.widget.Toast;
 
 import com.android.dailyduas.model.Items;
 import com.android.dailyduas.model.RecylerviewAdapter;
+import com.android.dailyduas.model.UTILS;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -20,7 +21,7 @@ import java.util.ArrayList;
 
 public class MainActivity extends AppCompatActivity {
 
-    RecyclerView main ;
+    RecyclerView main;
     ArrayList<String> names = new ArrayList<>();
     ArrayList<Items> itemsArrayList = new ArrayList<>();
     Items items;
@@ -32,56 +33,35 @@ public class MainActivity extends AppCompatActivity {
         main = (RecyclerView) findViewById(R.id.rvMain);
 
 
-
-        get_json();
+        //to get data from json
+        get_json("dailyduas.json");
         main.setLayoutManager(new LinearLayoutManager(this));
-       main.setAdapter(new RecylerviewAdapter(getApplicationContext(),itemsArrayList));
+        main.setAdapter(new RecylerviewAdapter(getApplicationContext(), itemsArrayList));
 
     }
 
-    public void get_json(){
-        String json;
-
-//        Toast.makeText(this, "Inside get", Toast.LENGTH_SHORT).show();
-//        Toast.makeText(this, "Inside get 2", Toast.LENGTH_SHORT).show();
+    public void get_json(String jsonname) {
 
         try {
-            InputStream is = getAssets().open("dailyduas.json");
-            int size = is.available();
-            byte[] buffer = new byte[size];
-            is.read(buffer);
-            is.close();
+            UTILS utils = new UTILS(this);
+            JSONArray jsonArray = utils.get_json(jsonname);
 
-            json = new String(buffer,"UTF-8");
-            JSONArray jsonArray = new JSONArray(json);
-
-            for (int i = 0 ; i <jsonArray.length();i++){
+            for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
-                if(obj!=null){
+                if (obj != null) {
                     //created a new instance because of duplication issue
                     items = new Items();
                     items.setName(obj.getString("name"));
-                    //aded items to array list
+                    //aded items to array list to display in home page and added to recycler view
                     itemsArrayList.add(items);
                 }
-                Toast.makeText(this, "inside json array", Toast.LENGTH_SHORT).show();
+                // Toast.makeText(this, "inside json array", Toast.LENGTH_SHORT).show();
 
 
+            }
 
 
-
-
-
-
-
-
-
-
-  }
-
-
-
-        } catch (IOException | JSONException e) {
+        } catch (JSONException e) {
             e.printStackTrace();
         }
 
