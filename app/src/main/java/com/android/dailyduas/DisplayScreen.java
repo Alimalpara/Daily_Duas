@@ -3,35 +3,41 @@ package com.android.dailyduas;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Handler;
-import android.text.Layout;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.android.dailyduas.model.SpinnerAdapter;
+import com.android.dailyduas.Adapters.DisplayRecylerviewAdapter;
+import com.android.dailyduas.model.ImagesName;
+import com.android.dailyduas.Adapters.ImagesRecylerViewAdapter;
+import com.android.dailyduas.Adapters.SpinnerAdapter;
 import com.android.dailyduas.model.SpinnerItemsName;
-import com.android.dailyduas.model.UTILS;
+import com.android.dailyduas.Utilties.UTILS;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfig;
+import com.google.firebase.remoteconfig.FirebaseRemoteConfigSettings;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.Objects;
 
 public class DisplayScreen extends AppCompatActivity {
@@ -43,6 +49,12 @@ public class DisplayScreen extends AppCompatActivity {
     SpinnerAdapter spinnerAdapter;
     ConstraintLayout fonstyleLayout;
     ImageView duasImages;
+    ArrayList<String> images ;
+    ImagesRecylerViewAdapter imagesRecylerViewAdapter;
+    RecyclerView imagesDuaRecyclerView;
+    FirebaseRemoteConfig mFirebaseRemoteConfig;
+    int count=0;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -52,10 +64,16 @@ public class DisplayScreen extends AppCompatActivity {
         setTitle("Daily Duas");
         Objects.requireNonNull(getSupportActionBar()).setDisplayHomeAsUpEnabled(true);
         initViews();
-        //to get json file
-        get_json("dailyduas.json");
+        /*//to get json file
+        get_json("dailyduas.json");*/
         //to set default text of open sans bold.
         changefont("0");
+
+
+        //to get data from firebase
+        fireBaseJson();
+
+
         //duasImages.setImageResource(R.drawable.afterwuzu1);
 
         //seekbar method
@@ -118,12 +136,49 @@ public class DisplayScreen extends AppCompatActivity {
 
     }
 
+    //to get json from firebase
+    //to get from firebase
+    public void fireBaseJson(){
+        mFirebaseRemoteConfig = FirebaseRemoteConfig.getInstance();
+        FirebaseRemoteConfigSettings configSettings = new FirebaseRemoteConfigSettings.Builder()
+                .setMinimumFetchIntervalInSeconds(3600)
+                .build();
+        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
+        mFirebaseRemoteConfig.setConfigSettingsAsync(configSettings);
+
+        //tofetch and activate
+        mFirebaseRemoteConfig.fetchAndActivate().addOnCompleteListener(new OnCompleteListener<Boolean>() {
+            @Override
+            public void onComplete(@NonNull Task<Boolean> task) {
+                if(task.isSuccessful()){
+                    String jsononline = mFirebaseRemoteConfig.getString("dailyduas1");
+                   /*   JSONArray jsonArray = new JSONArray(jsononline);
+                      for (int i = 0; i<jsonArray.length();i++){
+
+                          JSONObject obj = jsonArray.getJSONObject(i);
+                          if (obj != null) {
+                              //created a new instance because of duplication issue
+                              items = new Items();
+                              items.setName(obj.getString("name"));
+                              //aded items to array list to display in home page and added to recycler view
+                              itemsArrayList.add(items);
+                          }
+                      }*/
+                    get_json(jsononline);
+
+
+                }
+
+            }
+        });
+    }
+
     public void get_json(String jsonname) {
 
 
         try {
-            UTILS utils = new UTILS(this);
-            JSONArray jsonArray = utils.get_json(jsonname);
+
+            JSONArray jsonArray = new JSONArray(jsonname);
             //Toast.makeText(this, jsonArray.length(), Toast.LENGTH_SHORT).show();
 
 
@@ -131,12 +186,17 @@ public class DisplayScreen extends AppCompatActivity {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject obj = jsonArray.getJSONObject(i);
                 //to check for boolean and images exists or not
+                //this below code to differentiate between images or niot images
+                
+                
                 if (obj != null && obj.getString("name").equals(name)) {
                     //if no images
                     if (!obj.getBoolean("isimages")) {
                         content.setText(obj.getString("content"));
                         duasImages.setVisibility(View.GONE);
-                    } else if (obj.getBoolean("isimages")) {
+                    }
+                    else if (obj.getBoolean("isimages")) {
+                        //duasImages.setVisibility(View.VISIBLE);
                         //if images are there
 //                        JSONObject imageObj = obj.getJSONObject("images");
 //                        JSONArray imageArray = obj.getJSONArray("images");
@@ -148,21 +208,40 @@ public class DisplayScreen extends AppCompatActivity {
                         duasImages.setImageResource(resourceId);
 
                         content.setText("Images here //");
-                        obj.getString("images");
+                        
+                        
+                        //this below code to get array of images from here 
+                        
                         JSONArray imagesArray = obj.getJSONArray("images");
 
                         //int lenth = imagesArray.length();
                        /// Toast.makeText(context, lenth, Toast.LENGTH_SHORT).show();
                       //  Toast.makeText(context, imagesArray.length(), Toast.LENGTH_SHORT).show();
 
+
+                        images = new ArrayList<>();
+
                         for(int j = 0; j<imagesArray.length();j++){
-                            JSONObject imagesObj = imagesArray.getJSONObject(j);
-                            Toast.makeText(this, "hello", Toast.LENGTH_SHORT).show();
-                            if(imagesObj!=null){
-                                String name = imagesObj.getString("images");
-                                Toast.makeText(this, imagesObj.length(), Toast.LENGTH_SHORT).show();
-                            }
+                            count++;
+
+
+
+                            String name = imagesArray.getString(j);
+                          images.add(name);
+
+                            ImagesName imagesName = new ImagesName();
+                            imagesName.setName(name);
+                            imagesName.imagesNameArrayList.add(imagesName);
+
+
+
+
+
+//
+
                         }
+
+
 
 
                     }
@@ -177,6 +256,13 @@ public class DisplayScreen extends AppCompatActivity {
             e.printStackTrace();
         }
 
+        //setting adapter and views after getting data
+        imagesRecylerViewAdapter = new ImagesRecylerViewAdapter(this,images);
+        imagesDuaRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+        imagesRecylerViewAdapter.notifyDataSetChanged();
+
+        imagesDuaRecyclerView.setAdapter(imagesRecylerViewAdapter);
+
     }
 
     public void initViews() {
@@ -187,6 +273,7 @@ public class DisplayScreen extends AppCompatActivity {
         spinner = (Spinner) findViewById(R.id.spinnerContent);
         fonstyleLayout = (ConstraintLayout) findViewById(R.id.fontStylelayout);
         duasImages = (ImageView) findViewById(R.id.ivDuas);
+        imagesDuaRecyclerView = (RecyclerView) findViewById(R.id.dRecylerViewDua);
 
 
     }
