@@ -111,7 +111,11 @@ public class MainActivity extends AppCompatActivity {
                     itemsArrayList.add(items);
                 }
 
+                main.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
+                displayRecylerviewAdapter = new DisplayRecylerviewAdapter(getApplicationContext(),itemsArrayList);
+                displayRecylerviewAdapter.notifyDataSetChanged();
 
+                main.setAdapter(displayRecylerviewAdapter);
 
             }
 
@@ -122,10 +126,6 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(this, "Count out"+count, Toast.LENGTH_SHORT).show();
 
         // Toast.makeText(this, "inside json array", Toast.LENGTH_SHORT).show();
-        main.setLayoutManager(new LinearLayoutManager(getApplicationContext()));
-        displayRecylerviewAdapter = new DisplayRecylerviewAdapter(getApplicationContext(),itemsArrayList);
-        displayRecylerviewAdapter.notifyDataSetChanged();
 
-        main.setAdapter(displayRecylerviewAdapter);
     }
 }

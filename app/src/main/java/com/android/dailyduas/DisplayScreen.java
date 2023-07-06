@@ -194,18 +194,20 @@ public class DisplayScreen extends AppCompatActivity {
                     if (!obj.getBoolean("isimages")) {
                         content.setText(obj.getString("content"));
                         duasImages.setVisibility(View.GONE);
+                        imagesDuaRecyclerView.setVisibility(View.GONE);
                     }
                     else if (obj.getBoolean("isimages")) {
+                        imagesDuaRecyclerView.setVisibility(View.VISIBLE);
                         //duasImages.setVisibility(View.VISIBLE);
                         //if images are there
 //                        JSONObject imageObj = obj.getJSONObject("images");
 //                        JSONArray imageArray = obj.getJSONArray("images");
-                        Context context = this; // context
+                       /* Context context = this; // context
                         Resources resources = context.getResources();
                         String imgname = obj.getString("image");
                         // get resource id by image name
                         final int resourceId = resources.getIdentifier(imgname, "drawable", context.getPackageName());
-                        duasImages.setImageResource(resourceId);
+                        duasImages.setImageResource(resourceId);*/
 
                         content.setText("Images here //");
                         
@@ -227,13 +229,18 @@ public class DisplayScreen extends AppCompatActivity {
 
 
                             String name = imagesArray.getString(j);
-                          images.add(name);
+                            images.add(name);
 
                             ImagesName imagesName = new ImagesName();
                             imagesName.setName(name);
                             imagesName.imagesNameArrayList.add(imagesName);
 
+                            //setting adapter and views after getting data
+                            imagesRecylerViewAdapter = new ImagesRecylerViewAdapter(this,images);
+                            imagesDuaRecyclerView.setLayoutManager(new LinearLayoutManager(this));
+                            imagesRecylerViewAdapter.notifyDataSetChanged();
 
+                            imagesDuaRecyclerView.setAdapter(imagesRecylerViewAdapter);
 
 
 
@@ -256,12 +263,7 @@ public class DisplayScreen extends AppCompatActivity {
             e.printStackTrace();
         }
 
-        //setting adapter and views after getting data
-        imagesRecylerViewAdapter = new ImagesRecylerViewAdapter(this,images);
-        imagesDuaRecyclerView.setLayoutManager(new LinearLayoutManager(this));
-        imagesRecylerViewAdapter.notifyDataSetChanged();
 
-        imagesDuaRecyclerView.setAdapter(imagesRecylerViewAdapter);
 
     }
 
