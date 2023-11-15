@@ -23,6 +23,8 @@ import org.json.JSONObject;
 
 import java.util.ArrayList;
 
+//changes to v2 branch and started first cod
+
 public class MainActivity extends AppCompatActivity {
 
     RecyclerView main;
